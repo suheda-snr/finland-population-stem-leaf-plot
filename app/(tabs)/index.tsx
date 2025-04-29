@@ -1,74 +1,105 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const cityPopulations = [660, 310, 250, 240, 210, 195, 145, 120, 120, 85];
 
-export default function HomeScreen() {
+const getStemAndLeafData = (data: number[]): [number, number[]][] => {
+  const map = new Map();
+
+  data.sort((a: number, b: number) => a - b).forEach((num: number) => {
+    const stem = Math.floor(num / 10); 
+    const leaf = num % 10;
+    if (!map.has(stem)) {
+      map.set(stem, []);
+    }
+    map.get(stem).push(leaf);
+  });
+
+  return Array.from(map.entries());
+};
+
+const StemAndLeafPlot = ({ data }: { data: number[] }) => {
+  const stemLeafData = getStemAndLeafData(data);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>📈 Finnish City Populations (in thousands)</Text>
+      <Text style={styles.legend}>Legend: "Stem | Leaf" → Stem ×10 + Leaf = Population in 1000s</Text>
+
+      <View style={styles.tableHeader}>
+        <Text style={styles.headerStem}>Stem</Text>
+        <Text style={styles.headerLeaf}>Leaf</Text>
+      </View>
+
+      {stemLeafData.map(([stem, leaves]) => (
+        <View key={stem} style={styles.row}>
+          <Text style={styles.stem}>{stem}</Text>
+          <Text style={styles.leaf}>{leaves.join(' ')}</Text>
+        </View>
+      ))}
+    </ScrollView>
   );
+};
+
+export default function App() {
+  return <StemAndLeafPlot data={cityPopulations} />;
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 6,
+    color: '#1e3a8a',
+  },
+  legend: {
+    textAlign: 'center',
+    fontSize: 14,
+    marginBottom: 20,
+    color: '#555',
+    fontStyle: 'italic'
+  },
+  tableHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#aaa',
+    paddingBottom: 6,
+    marginBottom: 4,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  headerStem: {
+    width: 60,
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#374151',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  headerLeaf: {
+    flex: 1,
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#374151',
+  },
+  row: {
+    flexDirection: 'row',
+    paddingVertical: 6,
+    backgroundColor: '#f0f4f8',
+    marginBottom: 2,
+    borderRadius: 6,
+    paddingHorizontal: 8
+  },
+  stem: {
+    width: 60,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  leaf: {
+    flex: 1,
+    fontSize: 18,
+    color: '#1f2937',
   },
 });
